@@ -4,12 +4,12 @@
        xmlns:integration="http://www.springframework.org/schema/integration"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd">
 
-    <bean id="dateTimeService" class="pl.dzmitrow.training.DateTimeService"/>
+    <bean id="dateTimeService" class="pl.dzmitrow.training.lab01.DateTimeService"/>
 
     <integration:channel id="messages"/>
 
     <integration:service-activator input-channel="messages" ref="dateTimeService" method="print"/>
 
-    <integration:gateway id="dateTimeGateway" service-interface="pl.dzmitrow.training.DateTime" default-request-channel="messages"/>
+    <integration:gateway id="dateTimeGateway" service-interface="pl.dzmitrow.training.lab01.DateTime" default-request-channel="messages"/>
 
 </beans>

@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+       xmlns:stream="http://www.springframework.org/schema/integration/stream"
+       xmlns:integration="http://www.springframework.org/schema/integration"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/integration/stream http://www.springframework.org/schema/integration/stream/spring-integration-stream.xsd">
+
+    <stream:stdin-channel-adapter id="reader" channel="messages">
+        <integration:poller fixed-rate="2000"/>
+    </stream:stdin-channel-adapter>
+
+
+    <stream:stdout-channel-adapter id="writer1" channel="messages"/>
+    <stream:stdout-channel-adapter id="writer2" channel="messages"/>
+
+    <integration:publish-subscribe-channel id="messages"/>
 
 </beans>
