@@ -10,4 +10,6 @@
 
     <integration:service-activator input-channel="messages" ref="dateTimeService" method="print"/>
 
+    <integration:gateway id="dateTimeGateway" service-interface="pl.dzmitrow.training.DateTime" default-request-channel="messages"/>
+
 </beans>
