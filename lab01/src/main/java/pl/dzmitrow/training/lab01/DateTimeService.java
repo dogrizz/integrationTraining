@@ -1,4 +1,4 @@
-package pl.dzmitrow.training;
+package pl.dzmitrow.training.lab01;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

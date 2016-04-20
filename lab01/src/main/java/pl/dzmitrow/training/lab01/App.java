@@ -1,11 +1,9 @@
-package pl.dzmitrow.training;
+package pl.dzmitrow.training.lab01;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
-
-import java.util.Date;
 
 public class App {
     public static void main(String[] args) {
