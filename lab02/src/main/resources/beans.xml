@@ -10,8 +10,8 @@
     </stream:stdin-channel-adapter>
 
 
-    <stream:stdout-channel-adapter id="writer1" channel="messages"/>
-    <stream:stdout-channel-adapter id="writer2" channel="messages"/>
+    <stream:stdout-channel-adapter id="writer1" channel="messages" append-newline="true"/>
+    <stream:stdout-channel-adapter id="writer2" channel="messages" append-newline="true"/>
 
     <integration:publish-subscribe-channel id="messages"/>
 
