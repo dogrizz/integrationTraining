@@ -3,7 +3,8 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:integration="http://www.springframework.org/schema/integration"
        xmlns:file="http://www.springframework.org/schema/integration/file"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd http://www.springframework.org/schema/integration/file http://www.springframework.org/schema/integration/file/spring-integration-file.xsd">
+       xmlns:int-xml="http://www.springframework.org/schema/integration/xml"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd http://www.springframework.org/schema/integration/file http://www.springframework.org/schema/integration/file/spring-integration-file.xsd http://www.springframework.org/schema/integration/xml http://www.springframework.org/schema/integration/xml/spring-integration-xml.xsd">
 
     <bean id="fileSelector" class="pl.dzmitrow.training.lab03.ShipOrderFileSelector" />
 
@@ -11,12 +12,16 @@
         <integration:poller fixed-rate="5000"/>
     </file:inbound-channel-adapter>
 
-    <integration:filter input-channel="files" output-channel="shipOrderFiles" ref="fileSelector"/>
+    <integration:chain input-channel="files" output-channel="shipOrders">
+        <integration:filter ref="fileSelector"/>
+        <file:file-to-string-transformer charset="UTF-8"/>
+        <int-xml:validating-filter schema-location="shiporder.xsd"/>
+    </integration:chain>
 
-    <file:outbound-channel-adapter directory="file:/Users/dogrizz/outbound" channel="shipOrderFiles"/>
+    <file:outbound-channel-adapter directory="file:/Users/dogrizz/outbound" channel="shipOrders"/>
 
     <integration:channel id="files"/>
 
-    <integration:channel id="shipOrderFiles"/>
+    <integration:channel id="shipOrders"/>
 
 </beans>
