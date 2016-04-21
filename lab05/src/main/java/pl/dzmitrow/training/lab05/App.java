@@ -7,7 +7,10 @@ public class App {
         try(ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("beans.xml")){
           RatePoller ratePoller = applicationContext.getBean("ratePoller",RatePoller.class);
             ratePoller.refresh("asd");
+            Thread.sleep(300000);
 
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
