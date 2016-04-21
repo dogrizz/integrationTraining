@@ -5,7 +5,8 @@
        xmlns:stream="http://www.springframework.org/schema/integration/stream"
        xmlns:jdbc="http://www.springframework.org/schema/jdbc"
        xmlns:int-jdbc="http://www.springframework.org/schema/integration/jdbc"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd http://www.springframework.org/schema/integration/stream http://www.springframework.org/schema/integration/stream/spring-integration-stream.xsd http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd http://www.springframework.org/schema/integration/jdbc http://www.springframework.org/schema/integration/jdbc/spring-integration-jdbc.xsd">
+       xmlns:http="http://www.springframework.org/schema/integration/http"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd http://www.springframework.org/schema/integration/stream http://www.springframework.org/schema/integration/stream/spring-integration-stream.xsd http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd http://www.springframework.org/schema/integration/jdbc http://www.springframework.org/schema/integration/jdbc/spring-integration-jdbc.xsd http://www.springframework.org/schema/integration/http http://www.springframework.org/schema/integration/http/spring-integration-http.xsd">
 
     <jdbc:embedded-database id="dataSource" type="H2">
         <jdbc:script location="import.sql"/>
@@ -54,6 +55,10 @@
 
     <integration:channel id="delivery"/>
 
+    <integration:channel id="requestChannel"/>
+
+    <integration:channel id="response"/>
+
     <integration:router input-channel="itemsToProcess" expression="payload.coffee.iced ? 'coldItems' : 'hotItems'"/>
 
     <integration:service-activator input-channel="hotItems" output-channel="preparedItems" ref="mietek" method="prepareCoffee"/>
@@ -65,5 +70,13 @@
     <stream:stdout-channel-adapter channel="delivery" append-newline="true"/>
 
     <stream:stdout-channel-adapter channel="selectedItems" append-newline="true"/>
-    
+
+    <integration:inbound-channel-adapter channel="requestChannel" expression="''">
+        <integration:poller fixed-rate="3000"/>
+    </integration:inbound-channel-adapter>
+
+    <http:outbound-gateway request-channel="requestChannel" reply-channel="response" url="http://localhost:8080/api/orders" http-method="GET" expected-response-type="java.lang.String"/>
+
+    <integration:json-to-object-transformer input-channel="response" type="pl.dzmitrow.training.lab04.order.Order" output-channel="placedOrders"/>
+
 </beans>
