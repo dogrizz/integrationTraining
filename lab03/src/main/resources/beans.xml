@@ -8,6 +8,8 @@
 
     <bean id="fileSelector" class="pl.dzmitrow.training.lab03.ShipOrderFileSelector" />
 
+    <int-xml:xpath-expression expression="//country='Norway'" id="countrySelector"/>
+
     <file:inbound-channel-adapter directory="file:/Users/dogrizz/inbound" channel="files">
         <integration:poller fixed-rate="5000"/>
     </file:inbound-channel-adapter>
@@ -16,6 +18,8 @@
         <integration:filter ref="fileSelector"/>
         <file:file-to-string-transformer charset="UTF-8"/>
         <int-xml:validating-filter schema-location="shiporder.xsd"/>
+        <int-xml:xpath-filter xpath-expression-ref="countrySelector" />
+        <integration:transformer expression="payload.toUpperCase()"/>
     </integration:chain>
 
     <file:outbound-channel-adapter directory="file:/Users/dogrizz/outbound" channel="shipOrders"/>
