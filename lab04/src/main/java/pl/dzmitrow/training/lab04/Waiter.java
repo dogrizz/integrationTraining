@@ -6,8 +6,9 @@ import java.util.List;
 
 public class Waiter {
 
-    public void serve(List<Coffee> cofeeList) {
+    public List<Coffee> serve(List<Coffee> cofeeList) {
         System.out.println("Serving... " + cofeeList);
+        return cofeeList;
     }
 
 }

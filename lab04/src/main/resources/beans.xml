@@ -2,7 +2,8 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:integration="http://www.springframework.org/schema/integration"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd">
+       xmlns:stream="http://www.springframework.org/schema/integration/stream"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd http://www.springframework.org/schema/integration/stream http://www.springframework.org/schema/integration/stream/spring-integration-stream.xsd">
 
     <bean id="mietek" class="pl.dzmitrow.training.lab04.Barista"/>
 
@@ -24,12 +25,16 @@
 
     <integration:channel id="preparedItems"/>
 
+    <integration:channel id="delivery"/>
+
     <integration:router input-channel="items" expression="payload.coffee.iced ? 'coldItems' : 'hotItems'"/>
 
     <integration:service-activator input-channel="hotItems" output-channel="preparedItems" ref="mietek" method="prepareCoffee"/>
 
     <integration:service-activator input-channel="coldItems" output-channel="preparedItems" ref="zenek" method="prepareCoffee"/>
 
-    <integration:aggregator input-channel="preparedItems" ref="henio" method="serve"/>
+    <integration:aggregator input-channel="preparedItems" ref="henio" method="serve" output-channel="delivery"/>
 
+    <stream:stdout-channel-adapter channel="delivery"/>
+    
 </beans>
