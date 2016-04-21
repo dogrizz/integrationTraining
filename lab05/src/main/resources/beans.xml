@@ -7,6 +7,8 @@
        xmlns:int-xml="http://www.springframework.org/schema/integration/xml"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd http://www.springframework.org/schema/integration/http http://www.springframework.org/schema/integration/http/spring-integration-http.xsd http://www.springframework.org/schema/integration/stream http://www.springframework.org/schema/integration/stream/spring-integration-stream.xsd http://www.springframework.org/schema/integration/xml http://www.springframework.org/schema/integration/xml/spring-integration-xml.xsd">
 
+    <integration:gateway id="ratePoller" service-interface="pl.dzmitrow.training.lab05.RatePoller" default-request-channel="requestChannel"/>
+
     <integration:channel id="requestChannel"/>
 
     <integration:channel id="response"/>
@@ -20,15 +22,12 @@
         </property>
     </bean>
 
-    <integration:inbound-channel-adapter channel="requestChannel" expression="''">
-        <integration:poller fixed-rate="3000"/>
-    </integration:inbound-channel-adapter>
-
     <http:outbound-gateway request-channel="requestChannel" reply-channel="response" url="http://www.nbp.pl/kursy/xml/a077z160421.xml" http-method="GET" expected-response-type="java.lang.String"/>
 
     <integration:chain input-channel="response">
         <integration:transformer expression="payload.replaceAll(',','.')"/>
         <int-xml:unmarshalling-transformer unmarshaller="unmarshaller"/>
+        <integration:splitter expression="payload.rates"/>
         <stream:stdout-channel-adapter append-newline="true"/>
     </integration:chain>
 
