@@ -5,12 +5,18 @@
        xmlns:file="http://www.springframework.org/schema/integration/file"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd http://www.springframework.org/schema/integration/file http://www.springframework.org/schema/integration/file/spring-integration-file.xsd">
 
+    <bean id="fileSelector" class="pl.dzmitrow.training.lab03.ShipOrderFileSelector" />
+
     <file:inbound-channel-adapter directory="file:/Users/dogrizz/inbound" channel="files">
         <integration:poller fixed-rate="5000"/>
     </file:inbound-channel-adapter>
 
-    <file:outbound-channel-adapter directory="file:/Users/dogrizz/outbound" channel="files"/>
+    <integration:filter input-channel="files" output-channel="shipOrderFiles" ref="fileSelector"/>
+
+    <file:outbound-channel-adapter directory="file:/Users/dogrizz/outbound" channel="shipOrderFiles"/>
 
     <integration:channel id="files"/>
+
+    <integration:channel id="shipOrderFiles"/>
 
 </beans>
