@@ -4,9 +4,14 @@
        xmlns:integration="http://www.springframework.org/schema/integration"
        xmlns:file="http://www.springframework.org/schema/integration/file"
        xmlns:int-xml="http://www.springframework.org/schema/integration/xml"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd http://www.springframework.org/schema/integration/file http://www.springframework.org/schema/integration/file/spring-integration-file.xsd http://www.springframework.org/schema/integration/xml http://www.springframework.org/schema/integration/xml/spring-integration-xml.xsd">
+       xmlns:stream="http://www.springframework.org/schema/integration/stream"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd http://www.springframework.org/schema/integration/file http://www.springframework.org/schema/integration/file/spring-integration-file.xsd http://www.springframework.org/schema/integration/xml http://www.springframework.org/schema/integration/xml/spring-integration-xml.xsd http://www.springframework.org/schema/integration/stream http://www.springframework.org/schema/integration/stream/spring-integration-stream.xsd">
 
     <bean id="fileSelector" class="pl.dzmitrow.training.lab03.ShipOrderFileSelector" />
+
+    <bean id="unmarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+        <property name="contextPath" value="pl.dzmitrow.training.lab03"/>
+    </bean>
 
     <int-xml:xpath-expression expression="//country='Norway'" id="countrySelector"/>
 
@@ -19,13 +24,26 @@
         <file:file-to-string-transformer charset="UTF-8"/>
         <int-xml:validating-filter schema-location="shiporder.xsd"/>
         <int-xml:xpath-filter xpath-expression-ref="countrySelector" />
-        <integration:transformer expression="payload.toUpperCase()"/>
     </integration:chain>
 
-    <file:outbound-channel-adapter directory="file:/Users/dogrizz/outbound" channel="shipOrders"/>
+    <integration:recipient-list-router input-channel="shipOrders">
+        <integration:recipient channel="shipOrdersFiles"/>
+        <integration:recipient channel="shipOrdersObjects"/>
+    </integration:recipient-list-router>
+
+    <integration:chain input-channel="shipOrdersObjects">
+        <int-xml:unmarshalling-transformer unmarshaller="unmarshaller"/>
+        <stream:stdout-channel-adapter/>
+    </integration:chain>
+
+    <file:outbound-channel-adapter directory="file:/Users/dogrizz/outbound" channel="shipOrdersFiles"/>
 
     <integration:channel id="files"/>
 
     <integration:channel id="shipOrders"/>
+
+    <integration:channel id="shipOrdersFiles"/>
+
+    <integration:channel id="shipOrdersObjects"/>
 
 </beans>

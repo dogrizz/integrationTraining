@@ -188,6 +188,16 @@ public class Shiporder {
         this.orderid = value;
     }
 
+    @Override
+    public String toString() {
+        return "Shiporder{" +
+                "orderperson='" + orderperson + '\'' +
+                ", shipto=" + shipto +
+                ", item=" + item +
+                ", orderid='" + orderid + '\'' +
+                '}';
+    }
+
 
     /**
      * <p>Java class for anonymous complex type.
@@ -228,6 +238,16 @@ public class Shiporder {
         protected BigInteger quantity;
         @XmlElement(required = true)
         protected BigDecimal price;
+
+        @Override
+        public String toString() {
+            return "Item{" +
+                    "title='" + title + '\'' +
+                    ", note='" + note + '\'' +
+                    ", quantity=" + quantity +
+                    ", price=" + price +
+                    '}';
+        }
 
         /**
          * Gets the value of the title property.
@@ -367,6 +387,16 @@ public class Shiporder {
         protected String city;
         @XmlElement(required = true)
         protected String country;
+
+        @Override
+        public String toString() {
+            return "Shipto{" +
+                    "name='" + name + '\'' +
+                    ", address='" + address + '\'' +
+                    ", city='" + city + '\'' +
+                    ", country='" + country + '\'' +
+                    '}';
+        }
 
         /**
          * Gets the value of the name property.
