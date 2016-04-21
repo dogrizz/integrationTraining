@@ -1,0 +1,1 @@
+create table items (id integer IDENTITY PRIMARY KEY , coffeeType varchar(100));

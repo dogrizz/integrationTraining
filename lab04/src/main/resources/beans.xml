@@ -3,7 +3,13 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:integration="http://www.springframework.org/schema/integration"
        xmlns:stream="http://www.springframework.org/schema/integration/stream"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd http://www.springframework.org/schema/integration/stream http://www.springframework.org/schema/integration/stream/spring-integration-stream.xsd">
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:int-jdbc="http://www.springframework.org/schema/integration/jdbc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd http://www.springframework.org/schema/integration/stream http://www.springframework.org/schema/integration/stream/spring-integration-stream.xsd http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd http://www.springframework.org/schema/integration/jdbc http://www.springframework.org/schema/integration/jdbc/spring-integration-jdbc.xsd">
+
+    <jdbc:embedded-database id="dataSource" type="H2">
+        <jdbc:script location="import.sql"/>
+    </jdbc:embedded-database>
 
     <bean id="mietek" class="pl.dzmitrow.training.lab04.Barista"/>
 
@@ -19,6 +25,27 @@
 
     <integration:channel id="items"/>
 
+    <integration:recipient-list-router input-channel="items">
+        <integration:recipient channel="itemsToProcess"/>
+        <integration:recipient channel="itemsToStore"/>
+    </integration:recipient-list-router>
+
+    <integration:chain input-channel="itemsToStore">
+        <integration:transformer expression="payload.coffee"/>
+        <integration:object-to-map-transformer/>
+        <int-jdbc:outbound-channel-adapter data-source="dataSource" query="Insert into items(coffeeType) values(:payload[coffeeType])"/>
+    </integration:chain>
+
+    <int-jdbc:inbound-channel-adapter data-source="dataSource" query="select * from Items" channel="selectedItems">
+        <integration:poller fixed-rate="10000"/>
+    </int-jdbc:inbound-channel-adapter>
+
+    <integration:channel id="itemsToProcess"/>
+
+    <integration:channel id="selectedItems"/>
+
+    <integration:channel id="itemsToStore"/>
+
     <integration:channel id="hotItems"/>
 
     <integration:channel id="coldItems"/>
@@ -27,7 +54,7 @@
 
     <integration:channel id="delivery"/>
 
-    <integration:router input-channel="items" expression="payload.coffee.iced ? 'coldItems' : 'hotItems'"/>
+    <integration:router input-channel="itemsToProcess" expression="payload.coffee.iced ? 'coldItems' : 'hotItems'"/>
 
     <integration:service-activator input-channel="hotItems" output-channel="preparedItems" ref="mietek" method="prepareCoffee"/>
 
@@ -35,6 +62,8 @@
 
     <integration:aggregator input-channel="preparedItems" ref="henio" method="serve" output-channel="delivery"/>
 
-    <stream:stdout-channel-adapter channel="delivery"/>
+    <stream:stdout-channel-adapter channel="delivery" append-newline="true"/>
+
+    <stream:stdout-channel-adapter channel="selectedItems" append-newline="true"/>
     
 </beans>
