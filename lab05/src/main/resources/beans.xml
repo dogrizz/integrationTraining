@@ -7,11 +7,15 @@
        xmlns:int-xml="http://www.springframework.org/schema/integration/xml"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd http://www.springframework.org/schema/integration/http http://www.springframework.org/schema/integration/http/spring-integration-http.xsd http://www.springframework.org/schema/integration/stream http://www.springframework.org/schema/integration/stream/spring-integration-stream.xsd http://www.springframework.org/schema/integration/xml http://www.springframework.org/schema/integration/xml/spring-integration-xml.xsd">
 
+    <bean id="idGenerator" class="pl.dzmitrow.training.lab05.IdGenerator"/>
+
     <integration:gateway id="ratePoller" service-interface="pl.dzmitrow.training.lab05.RatePoller" default-request-channel="requestChannel"/>
 
     <integration:channel id="requestChannel"/>
 
     <integration:channel id="response"/>
+
+    <integration:channel id="final"/>
 
     <bean id="unmarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
         <property name="classesToBeBound">
@@ -24,11 +28,20 @@
 
     <http:outbound-gateway request-channel="requestChannel" reply-channel="response" url="http://www.nbp.pl/kursy/xml/a077z160421.xml" http-method="GET" expected-response-type="java.lang.String"/>
 
-    <integration:chain input-channel="response">
+    <integration:chain input-channel="response" output-channel="final">
         <integration:transformer expression="payload.replaceAll(',','.')"/>
         <int-xml:unmarshalling-transformer unmarshaller="unmarshaller"/>
         <integration:splitter expression="payload.rates"/>
-        <stream:stdout-channel-adapter append-newline="true"/>
+        <integration:header-enricher>
+            <integration:header name="entryId" ref="idGenerator" method="getNext" />
+        </integration:header-enricher>
+        <integration:enricher>
+            <integration:property name="id" expression="headers.entryId"/>
+        </integration:enricher>
     </integration:chain>
 
+    <stream:stdout-channel-adapter channel="final" append-newline="true"/>
+
+    <integration:wire-tap channel="logs" pattern="*"/>
+    <integration:logging-channel-adapter id="logs" level="INFO" log-full-message="true"/>
 </beans>

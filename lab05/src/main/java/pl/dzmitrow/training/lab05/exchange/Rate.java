@@ -8,6 +8,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "pozycja")
 public class Rate {
+
+    private Long id;
     @XmlElement(name = "nazwa_waluty")
     private String name;
     @XmlElement(name = "kod_waluty")
@@ -49,6 +51,14 @@ public class Rate {
         this.multiplier = multiplier;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -78,7 +88,8 @@ public class Rate {
     @Override
     public String toString() {
         return "Rate{" +
-                "name='" + name + '\'' +
+                "id=" + id +
+                ", name='" + name + '\'' +
                 ", code='" + code + '\'' +
                 ", rate=" + rate +
                 ", multiplier=" + multiplier +
